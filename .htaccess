@@ -1,0 +1,20 @@
+# Verzeichnislisting deaktivieren
+Options -Indexes
+
+# Sicherheits-Header
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Content-Security-Policy "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;"
+</IfModule>
+
+# Zugriff auf versteckte Dateien (z.B. .env, .git) verbieten
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>
+
+# Composer- und Doku-Dateien nicht oeffentlich ausliefern
+<FilesMatch "^(composer\.json|composer\.lock|README\.md)$">
+  Require all denied
+</FilesMatch>
