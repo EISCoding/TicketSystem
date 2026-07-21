@@ -87,7 +87,21 @@ h2 { font-weight: 700; letter-spacing: -0.01em; }
 }
 .user-chip .avatar { width: 26px; height: 26px; font-size: 0.7rem; }
 
+@media (max-width: 640px) {
+  .header { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
+  .header .brand span.brand-label { display: none; }
+  .header nav { margin-left: 14px; gap: 2px; }
+  .header nav a { padding: 6px 10px; font-size: 0.82rem; }
+  .header-right { gap: 8px; font-size: 0.8rem; }
+  .user-chip .user-name { display: none; }
+}
+
 .container { max-width: 1120px; margin: 0 auto; padding: 28px 24px 60px; }
+
+@media (max-width: 640px) {
+  .container { padding: 20px 16px 48px; }
+  h1 { font-size: 1.25rem; }
+}
 
 /* ---------- Cards ---------- */
 .card {
@@ -124,9 +138,9 @@ h2 { font-weight: 700; letter-spacing: -0.01em; }
 .avatar-muted { background: #eceef4; color: var(--text-muted); }
 .avatar-note { background: linear-gradient(135deg, #ffd452, #f5a623); }
 
-/* ---------- Table ---------- */
+/* ---------- Table (generic, admin lists) ---------- */
 .table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 720px; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
 th {
   text-align: left;
   color: var(--text-muted);
@@ -143,6 +157,46 @@ tbody tr { transition: background 0.12s ease; }
 tbody tr:hover td { background: #f8f9fd; }
 td a { font-weight: 600; color: var(--text); }
 td a:hover { color: var(--brand); text-decoration: none; }
+
+/* ---------- Ticket rows (responsive card-list, replaces plain table on the ticket overview) ---------- */
+.ticket-list { display: flex; flex-direction: column; }
+.ticket-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-top: 1px solid var(--border);
+  color: var(--text);
+  transition: background 0.12s ease;
+}
+.ticket-row:first-child { border-top: none; }
+.ticket-row:hover, .ticket-row:focus-visible { background: #f8f9fd; text-decoration: none; }
+.ticket-row:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+
+.ticket-row-main { flex: 1 1 auto; min-width: 0; }
+.ticket-row-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ticket-row-title .ticket-num { color: var(--text-muted); font-weight: 700; margin-right: 6px; }
+.ticket-row-sub {
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ticket-row-badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; flex: 0 0 auto; }
+.ticket-row-time { flex: 0 0 auto; white-space: nowrap; min-width: 108px; text-align: right; }
+
+@media (max-width: 720px) {
+  .ticket-row { flex-wrap: wrap; padding: 14px 16px; }
+  .ticket-row-badges { flex-basis: 100%; justify-content: flex-start; margin-top: 8px; order: 2; }
+  .ticket-row-time { flex-basis: 100%; text-align: left; margin-top: 6px; order: 3; }
+}
 
 /* ---------- Badges ---------- */
 .badge {
@@ -217,6 +271,13 @@ input:focus, select:focus, textarea:focus {
 }
 label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.03em; }
 .field { margin-bottom: 16px; }
+
+/* Verhindert automatisches Hineinzoomen von iOS Safari bei Fokus auf Formularfelder. */
+@media (max-width: 640px) {
+  input[type=text], input[type=email], input[type=password], input[type=search], select, textarea {
+    font-size: 16px;
+  }
+}
 
 /* ---------- Login ---------- */
 .login-wrap {
@@ -293,6 +354,12 @@ label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-
 .filters { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; align-items: flex-end; }
 .filters > * { max-width: 220px; }
 
+@media (max-width: 640px) {
+  .filters { flex-direction: column; align-items: stretch; }
+  .filters > * { max-width: none; }
+  .filters .btn { width: 100%; }
+}
+
 .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start; }
 @media (max-width: 900px) {
   .grid-2 { grid-template-columns: 1fr; }
@@ -313,9 +380,15 @@ label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-
 .message-outgoing { background: var(--brand-light); border-color: #d7deff; }
 .message-note { background: #fffcf0; border-color: #ffe8a3; }
 .message-content { flex: 1; min-width: 0; }
-.message-meta { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px; }
+.message-meta { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px; flex-wrap: wrap; }
 .message-meta strong { color: var(--text); font-weight: 700; }
 .message-body { white-space: pre-wrap; font-size: 0.92rem; line-height: 1.55; word-wrap: break-word; }
+
+@media (max-width: 640px) {
+  .message { padding: 12px; gap: 10px; }
+  .message .avatar { width: 28px; height: 28px; font-size: 0.7rem; }
+  .message-meta { font-size: 0.74rem; }
+}
 
 /* ---------- Tabs ---------- */
 .tabs { display: flex; gap: 6px; margin-bottom: 14px; }
@@ -329,6 +402,12 @@ label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-
 .tab-btn.active-reply:hover { color: #fff; }
 .tab-btn.active-note { background: linear-gradient(135deg, #ffd452, #f5a623); color: #7a4a00; border-color: transparent; }
 .tab-btn.active-note:hover { color: #7a4a00; }
+
+@media (max-width: 640px) {
+  .tabs { flex-wrap: wrap; }
+  .tab-btn { flex: 1 1 auto; text-align: center; }
+  #reply-form > .btn, #note-form > .btn { width: 100%; }
+}
 
 /* ---------- Sidebar ---------- */
 .sidebar h2 { font-size: 1rem; margin-top: 0; }
@@ -346,8 +425,22 @@ label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-
 .list-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 0; border-top: 1px solid var(--border); }
 .list-item:first-child { border-top: none; }
 
+@media (max-width: 640px) {
+  .list-item { flex-wrap: wrap; }
+}
+
 .empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); }
-.empty-state .empty-icon { font-size: 2.2rem; margin-bottom: 10px; opacity: 0.6; }
+.empty-state .empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--brand-light);
+  font-size: 1.6rem;
+  margin-bottom: 14px;
+}
 
 .text-muted { color: var(--text-muted); }
 .small { font-size: 0.8rem; }

@@ -52,29 +52,24 @@ require __DIR__ . '/src/Views/header.php';
   </div>
 <?php else: ?>
   <div class="card" style="padding:0; overflow:hidden;">
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th><th>Betreff</th><th>Anfragender</th><th>Team</th>
-            <th>Zugewiesen</th><th>Priorität</th><th>Status</th><th>Aktualisiert</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php foreach ($tickets as $t): ?>
-            <tr>
-              <td><a href="/ticket.php?id=<?= (int) $t['id'] ?>">#<?= (int) $t['id'] ?></a></td>
-              <td><a href="/ticket.php?id=<?= (int) $t['id'] ?>"><?= e($t['subject']) ?></a></td>
-              <td><?= e($t['requester_name'] ?: $t['requester_email']) ?></td>
-              <td><?= e($t['team_name'] ?? '–') ?></td>
-              <td><?= e($t['assigned_name'] ?? '–') ?></td>
-              <td><span class="badge badge-<?= strtolower(e($t['priority'])) ?>"><?= e($priorityLabels[$t['priority']] ?? $t['priority']) ?></span></td>
-              <td><span class="badge badge-<?= strtolower(e($t['status'])) ?>"><?= e($statusLabels[$t['status']] ?? $t['status']) ?></span></td>
-              <td class="small text-muted"><?= e(date('d.m.Y H:i', strtotime($t['updated_at']))) ?></td>
-            </tr>
-          <?php endforeach; ?>
-        </tbody>
-      </table>
+    <div class="ticket-list">
+      <?php foreach ($tickets as $t): ?>
+        <?php $requesterLabel = $t['requester_name'] ?: $t['requester_email']; ?>
+        <a class="ticket-row" href="/ticket.php?id=<?= (int) $t['id'] ?>">
+          <span class="avatar avatar-muted"><?= e(mb_strtoupper(mb_substr((string) $requesterLabel, 0, 1))) ?></span>
+          <div class="ticket-row-main">
+            <div class="ticket-row-title"><span class="ticket-num">#<?= (int) $t['id'] ?></span><?= e($t['subject']) ?></div>
+            <div class="ticket-row-sub small text-muted">
+              <?= e($requesterLabel) ?> · <?= e($t['team_name'] ?? 'Kein Team') ?> · <?= e($t['assigned_name'] ?? 'Nicht zugewiesen') ?>
+            </div>
+          </div>
+          <div class="ticket-row-badges">
+            <span class="badge badge-<?= strtolower(e($t['priority'])) ?>"><?= e($priorityLabels[$t['priority']] ?? $t['priority']) ?></span>
+            <span class="badge badge-<?= strtolower(e($t['status'])) ?>"><?= e($statusLabels[$t['status']] ?? $t['status']) ?></span>
+          </div>
+          <div class="ticket-row-time small text-muted"><?= e(date('d.m.Y H:i', strtotime($t['updated_at']))) ?></div>
+        </a>
+      <?php endforeach; ?>
     </div>
   </div>
 <?php endif; ?>

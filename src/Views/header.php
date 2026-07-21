@@ -13,7 +13,7 @@ use App\Auth;
 <body>
 <header class="header">
   <div class="header-left">
-    <span class="brand">🎫 Ticketsystem</span>
+    <span class="brand">🎫 <span class="brand-label">Ticketsystem</span></span>
     <nav>
       <a href="/tickets.php" class="<?= ($activePage ?? '') === 'tickets' ? 'active' : '' ?>">Tickets</a>
       <?php if (Auth::isAdmin()): ?>
@@ -24,7 +24,7 @@ use App\Auth;
   <div class="header-right">
     <span class="user-chip">
       <span class="avatar"><?= e(mb_strtoupper(mb_substr(Auth::userName(), 0, 1))) ?></span>
-      <?= e(Auth::userName()) ?>
+      <span class="user-name"><?= e(Auth::userName()) ?></span>
     </span>
     <a href="/logout.php">Abmelden</a>
   </div>
