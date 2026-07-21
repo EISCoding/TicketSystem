@@ -22,7 +22,10 @@ use App\Auth;
     </nav>
   </div>
   <div class="header-right">
-    <span><?= e(Auth::userName()) ?></span>
+    <span class="user-chip">
+      <span class="avatar"><?= e(mb_strtoupper(mb_substr(Auth::userName(), 0, 1))) ?></span>
+      <?= e(Auth::userName()) ?>
+    </span>
     <a href="/logout.php">Abmelden</a>
   </div>
 </header>
