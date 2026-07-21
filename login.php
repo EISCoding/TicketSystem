@@ -35,26 +35,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 <div class="login-wrap">
-  <form class="card login-card" method="post" action="/login.php">
+  <div class="login-brand">
+    <span class="brand-icon">🎫</span>
     <h1>Ticketsystem</h1>
-    <p>Melde dich mit deinem Team-Account an.</p>
+    <p>Alle Kundenanfragen an einem Ort — zuweisen, beantworten und im Blick behalten.</p>
+  </div>
+  <div class="login-form-side">
+    <form class="login-card" method="post" action="/login.php">
+      <h1>Willkommen zurück</h1>
+      <p>Melde dich mit deinem Team-Account an.</p>
 
-    <?php if ($error): ?>
-      <div class="alert alert-error"><?= e($error) ?></div>
-    <?php endif; ?>
+      <?php if ($error): ?>
+        <div class="alert alert-error"><?= e($error) ?></div>
+      <?php endif; ?>
 
-    <?= Auth::csrfField() ?>
+      <?= Auth::csrfField() ?>
 
-    <div class="field">
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" required autofocus>
-    </div>
-    <div class="field">
-      <label for="password">Passwort</label>
-      <input type="password" id="password" name="password" required>
-    </div>
-    <button type="submit" class="btn" style="width:100%">Anmelden</button>
-  </form>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Passwort</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <button type="submit" class="btn" style="width:100%">Anmelden</button>
+    </form>
+  </div>
 </div>
 </body>
 </html>

@@ -57,7 +57,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $ticket['requester_email'],
                     $subject,
                     $body,
-                    $lastIncoming['message_id'] ?? null
+                    $lastIncoming['message_id'] ?? null,
+                    $ticketId,
+                    $ticket['requester_name'] ?: null
                 );
                 Message::create($ticketId, 'OUTGOING', $body, null, Auth::userId(), $messageId);
                 Ticket::updateFields($ticketId, ['status' => 'PENDING']);
@@ -100,24 +102,36 @@ foreach ($templates as $tpl) {
 
 <div class="grid-2">
   <div>
-    <h1 class="mt-0">#<?= (int) $ticket['id'] ?> — <?= e($ticket['subject']) ?></h1>
-    <p class="text-muted mb-16">Von <?= e($ticket['requester_name'] ?: $ticket['requester_email']) ?> &lt;<?= e($ticket['requester_email']) ?>&gt;</p>
+    <h1 class="mt-0" style="margin-bottom:4px;">#<?= (int) $ticket['id'] ?> — <?= e($ticket['subject']) ?></h1>
+    <p class="text-muted mb-16">
+      Von <strong><?= e($ticket['requester_name'] ?: $ticket['requester_email']) ?></strong>
+      &lt;<?= e($ticket['requester_email']) ?>&gt;
+      <span class="badge badge-<?= strtolower(e($ticket['status'])) ?>" style="margin-left:8px;"><?= e($statusLabels[$ticket['status']] ?? $ticket['status']) ?></span>
+      <span class="badge badge-<?= strtolower(e($ticket['priority'])) ?>"><?= e($priorityLabels[$ticket['priority']] ?? $ticket['priority']) ?></span>
+    </p>
 
-    <?php foreach ($messages as $m): ?>
-      <?php
-        $cls = $m['direction'] === 'INCOMING' ? 'message-incoming' : ($m['direction'] === 'OUTGOING' ? 'message-outgoing' : 'message-note');
-        $label = $m['direction'] === 'INCOMING' ? e($ticket['requester_email'])
-               : ($m['direction'] === 'OUTGOING' ? e($m['author_name'] ?? 'Team')
-               : 'Interne Notiz — ' . e($m['author_name'] ?? ''));
-      ?>
-      <div class="message <?= $cls ?>">
-        <div class="message-meta">
-          <span><?= $directionLabels[$m['direction']] ?? '' ?> <?= $label ?></span>
-          <span><?= e(date('d.m.Y H:i', strtotime($m['created_at']))) ?></span>
+    <div class="thread">
+      <?php foreach ($messages as $m): ?>
+        <?php
+          $cls = $m['direction'] === 'INCOMING' ? 'message-incoming' : ($m['direction'] === 'OUTGOING' ? 'message-outgoing' : 'message-note');
+          $avatarCls = $m['direction'] === 'INCOMING' ? 'avatar-muted' : ($m['direction'] === 'INTERNAL_NOTE' ? 'avatar-note' : '');
+          $senderName = $m['direction'] === 'INCOMING' ? ($ticket['requester_name'] ?: $ticket['requester_email'])
+                 : ($m['direction'] === 'OUTGOING' ? ($m['author_name'] ?? 'Team')
+                 : ($m['author_name'] ?? ''));
+          $label = $m['direction'] === 'INTERNAL_NOTE' ? 'Interne Notiz' : ($m['direction'] === 'INCOMING' ? 'Kunde' : 'Antwort');
+        ?>
+        <div class="message <?= $cls ?>">
+          <span class="avatar <?= $avatarCls ?>"><?= e(mb_strtoupper(mb_substr((string) $senderName, 0, 1))) ?></span>
+          <div class="message-content">
+            <div class="message-meta">
+              <span><strong><?= e((string) $senderName) ?></strong> · <?= $directionLabels[$m['direction']] ?? '' ?> <?= e($label) ?></span>
+              <span><?= e(date('d.m.Y H:i', strtotime($m['created_at']))) ?></span>
+            </div>
+            <div class="message-body"><?= e($m['body']) ?></div>
+          </div>
         </div>
-        <div class="message-body"><?= e($m['body']) ?></div>
-      </div>
-    <?php endforeach; ?>
+      <?php endforeach; ?>
+    </div>
 
     <?php if ($error): ?>
       <div class="alert alert-error"><?= e($error) ?></div>
@@ -164,46 +178,58 @@ foreach ($templates as $tpl) {
       <?= Auth::csrfField() ?>
       <input type="hidden" name="action" value="update_fields">
 
-      <div class="field">
-        <label for="status">Status</label>
-        <select id="status" name="status">
-          <?php foreach ($statusLabels as $key => $label): ?>
-            <option value="<?= e($key) ?>" <?= $ticket['status'] === $key ? 'selected' : '' ?>><?= e($label) ?></option>
-          <?php endforeach; ?>
-        </select>
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Status &amp; Priorität</div>
+        <div class="field">
+          <label for="status">Status</label>
+          <select id="status" name="status">
+            <?php foreach ($statusLabels as $key => $label): ?>
+              <option value="<?= e($key) ?>" <?= $ticket['status'] === $key ? 'selected' : '' ?>><?= e($label) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+
+        <div class="field" style="margin-bottom:0;">
+          <label for="priority">Priorität</label>
+          <select id="priority" name="priority">
+            <?php foreach ($priorityLabels as $key => $label): ?>
+              <option value="<?= e($key) ?>" <?= $ticket['priority'] === $key ? 'selected' : '' ?>><?= e($label) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
       </div>
 
-      <div class="field">
-        <label for="priority">Priorität</label>
-        <select id="priority" name="priority">
-          <?php foreach ($priorityLabels as $key => $label): ?>
-            <option value="<?= e($key) ?>" <?= $ticket['priority'] === $key ? 'selected' : '' ?>><?= e($label) ?></option>
-          <?php endforeach; ?>
-        </select>
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Zuordnung</div>
+        <div class="field">
+          <label for="team_id">Team</label>
+          <select id="team_id" name="team_id">
+            <option value="">Kein Team</option>
+            <?php foreach ($teams as $team): ?>
+              <option value="<?= (int) $team['id'] ?>" <?= (int) $ticket['team_id'] === (int) $team['id'] ? 'selected' : '' ?>>
+                <?= e($team['name']) ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+
+        <div class="field" style="margin-bottom:0;">
+          <label for="assigned_to_id">Zugewiesen an</label>
+          <select id="assigned_to_id" name="assigned_to_id">
+            <option value="">Nicht zugewiesen</option>
+            <?php foreach ($users as $u): ?>
+              <option value="<?= (int) $u['id'] ?>" <?= (int) $ticket['assigned_to_id'] === (int) $u['id'] ? 'selected' : '' ?>>
+                <?= e($u['name']) ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
       </div>
 
-      <div class="field">
-        <label for="team_id">Team</label>
-        <select id="team_id" name="team_id">
-          <option value="">Kein Team</option>
-          <?php foreach ($teams as $team): ?>
-            <option value="<?= (int) $team['id'] ?>" <?= (int) $ticket['team_id'] === (int) $team['id'] ? 'selected' : '' ?>>
-              <?= e($team['name']) ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="assigned_to_id">Zugewiesen an</label>
-        <select id="assigned_to_id" name="assigned_to_id">
-          <option value="">Nicht zugewiesen</option>
-          <?php foreach ($users as $u): ?>
-            <option value="<?= (int) $u['id'] ?>" <?= (int) $ticket['assigned_to_id'] === (int) $u['id'] ? 'selected' : '' ?>>
-              <?= e($u['name']) ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Zeitverlauf</div>
+        <p class="small text-muted" style="margin:0 0 4px;">Erstellt: <?= e(date('d.m.Y H:i', strtotime($ticket['created_at']))) ?></p>
+        <p class="small text-muted" style="margin:0;">Aktualisiert: <?= e(date('d.m.Y H:i', strtotime($ticket['updated_at']))) ?></p>
       </div>
     </form>
   </div>
