@@ -13,7 +13,7 @@ use App\Auth;
 <body>
 <header class="header">
   <div class="header-left">
-    <span class="brand">🎫 <span class="brand-label">Ticketsystem</span></span>
+    <span class="brand"><span class="brand-mark">🎫</span> <span class="brand-label">Ticketsystem</span></span>
     <nav>
       <a href="/tickets.php" class="<?= ($activePage ?? '') === 'tickets' ? 'active' : '' ?>">Tickets</a>
       <?php if (Auth::isAdmin()): ?>

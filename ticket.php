@@ -81,7 +81,6 @@ $templates = Template::all();
 
 $statusLabels = ['OPEN' => 'Offen', 'PENDING' => 'Wartend', 'RESOLVED' => 'Gelöst', 'CLOSED' => 'Geschlossen'];
 $priorityLabels = ['LOW' => 'Niedrig', 'MEDIUM' => 'Mittel', 'HIGH' => 'Hoch', 'URGENT' => 'Dringend'];
-$directionLabels = ['INCOMING' => '📩', 'OUTGOING' => '📤', 'INTERNAL_NOTE' => '📝'];
 
 $activePage = 'tickets';
 require __DIR__ . '/src/Views/header.php';
@@ -102,13 +101,16 @@ foreach ($templates as $tpl) {
 
 <div class="grid-2">
   <div>
-    <h1 class="mt-0" style="margin-bottom:4px;">#<?= (int) $ticket['id'] ?> — <?= e($ticket['subject']) ?></h1>
-    <p class="text-muted mb-16">
-      Von <strong><?= e($ticket['requester_name'] ?: $ticket['requester_email']) ?></strong>
-      &lt;<?= e($ticket['requester_email']) ?>&gt;
-      <span class="badge badge-<?= strtolower(e($ticket['status'])) ?>" style="margin-left:8px;"><?= e($statusLabels[$ticket['status']] ?? $ticket['status']) ?></span>
-      <span class="badge badge-<?= strtolower(e($ticket['priority'])) ?>"><?= e($priorityLabels[$ticket['priority']] ?? $ticket['priority']) ?></span>
-    </p>
+    <div class="card ticket-stub">
+      <span class="stub-id">TICKET #<?= (int) $ticket['id'] ?></span>
+      <h1><?= e($ticket['subject']) ?></h1>
+      <p class="req">
+        Von <strong><?= e($ticket['requester_name'] ?: $ticket['requester_email']) ?></strong>
+        &lt;<?= e($ticket['requester_email']) ?>&gt;
+        <span class="badge badge-<?= strtolower(e($ticket['status'])) ?>" style="margin-left:8px;"><?= e($statusLabels[$ticket['status']] ?? $ticket['status']) ?></span>
+        <span class="badge badge-<?= strtolower(e($ticket['priority'])) ?>"><?= e($priorityLabels[$ticket['priority']] ?? $ticket['priority']) ?></span>
+      </p>
+    </div>
 
     <div class="thread">
       <?php foreach ($messages as $m): ?>
@@ -124,8 +126,8 @@ foreach ($templates as $tpl) {
           <span class="avatar <?= $avatarCls ?>"><?= e(mb_strtoupper(mb_substr((string) $senderName, 0, 1))) ?></span>
           <div class="message-content">
             <div class="message-meta">
-              <span><strong><?= e((string) $senderName) ?></strong> · <?= $directionLabels[$m['direction']] ?? '' ?> <?= e($label) ?></span>
-              <span><?= e(date('d.m.Y H:i', strtotime($m['created_at']))) ?></span>
+              <span><strong><?= e((string) $senderName) ?></strong> · <span class="tag"><?= e($label) ?></span></span>
+              <span class="time"><?= e(date('d.m.Y H:i', strtotime($m['created_at']))) ?></span>
             </div>
             <div class="message-body"><?= e($m['body']) ?></div>
           </div>
@@ -167,19 +169,18 @@ foreach ($templates as $tpl) {
         <div class="field">
           <textarea name="note_body" rows="5" placeholder="Interne Notiz (nicht sichtbar für Kunde)..."></textarea>
         </div>
-        <button type="submit" class="btn" style="background:#f5c518;">Notiz hinzufügen</button>
+        <button type="submit" class="btn btn-warn">Notiz hinzufügen</button>
       </form>
     </div>
   </div>
 
-  <div class="card sidebar">
-    <h2>Ticket-Details</h2>
+  <div class="side-stack">
     <form method="post" action="/ticket.php?id=<?= (int) $ticketId ?>" onchange="this.requestSubmit()">
       <?= Auth::csrfField() ?>
       <input type="hidden" name="action" value="update_fields">
 
-      <div class="sidebar-section">
-        <div class="sidebar-section-title">Status &amp; Priorität</div>
+      <div class="card side-card">
+        <div class="eyebrow">Status &amp; Priorität</div>
         <div class="field">
           <label for="status">Status</label>
           <select id="status" name="status">
@@ -199,8 +200,8 @@ foreach ($templates as $tpl) {
         </div>
       </div>
 
-      <div class="sidebar-section">
-        <div class="sidebar-section-title">Zuordnung</div>
+      <div class="card side-card">
+        <div class="eyebrow">Zuordnung</div>
         <div class="field">
           <label for="team_id">Team</label>
           <select id="team_id" name="team_id">
@@ -225,13 +226,13 @@ foreach ($templates as $tpl) {
           </select>
         </div>
       </div>
-
-      <div class="sidebar-section">
-        <div class="sidebar-section-title">Zeitverlauf</div>
-        <p class="small text-muted" style="margin:0 0 4px;">Erstellt: <?= e(date('d.m.Y H:i', strtotime($ticket['created_at']))) ?></p>
-        <p class="small text-muted" style="margin:0;">Aktualisiert: <?= e(date('d.m.Y H:i', strtotime($ticket['updated_at']))) ?></p>
-      </div>
     </form>
+
+    <div class="card side-card">
+      <div class="eyebrow">Zeitverlauf</div>
+      <p class="small text-muted mono" style="margin:0 0 4px;">Erstellt <?= e(date('d.m.Y H:i', strtotime($ticket['created_at']))) ?></p>
+      <p class="small text-muted mono" style="margin:0;">Aktualisiert <?= e(date('d.m.Y H:i', strtotime($ticket['updated_at']))) ?></p>
+    </div>
   </div>
 </div>
 
