@@ -62,7 +62,7 @@ require __DIR__ . '/../src/Views/admin_tabs.php';
             <?= Auth::csrfField() ?>
             <input type="hidden" name="action" value="delete">
             <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
-            <button type="submit" class="btn btn-danger" style="padding:5px 12px; font-size:0.8rem;">Löschen</button>
+            <button type="submit" class="btn btn-danger" style="padding:5px 12px; font-size:0.8rem;"><i class='bx bx-trash'></i> Löschen</button>
           </form>
         <?php endif; ?>
       </div>
@@ -72,8 +72,8 @@ require __DIR__ . '/../src/Views/admin_tabs.php';
   <form class="card" method="post" action="/admin/users.php">
     <?= Auth::csrfField() ?>
     <input type="hidden" name="action" value="create">
-    <h2 class="mt-0" style="font-size:1rem;">Neuer Benutzer</h2>
-    <?php if ($error): ?><div class="alert alert-error"><?= e($error) ?></div><?php endif; ?>
+    <h2 class="mt-0" style="font-size:1rem; display:flex; align-items:center; gap:8px;"><i class='bx bx-user-plus icon'></i> Neuer Benutzer</h2>
+    <?php if ($error): ?><div class="alert alert-error"><i class='bx bx-error-circle icon'></i> <?= e($error) ?></div><?php endif; ?>
     <div class="field">
       <label for="name">Name</label>
       <input type="text" id="name" name="name" required>
@@ -93,7 +93,7 @@ require __DIR__ . '/../src/Views/admin_tabs.php';
         <option value="ADMIN">Admin</option>
       </select>
     </div>
-    <button type="submit" class="btn" style="width:100%;">Benutzer anlegen</button>
+    <button type="submit" class="btn" style="width:100%;"><i class='bx bx-plus'></i> Benutzer anlegen</button>
   </form>
 </div>
 

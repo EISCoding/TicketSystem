@@ -59,11 +59,11 @@ $tplCount = (int) $pdo->query('SELECT COUNT(*) FROM email_templates')->fetchColu
 if ($tplCount === 0) {
     $stmt = $pdo->prepare('INSERT INTO email_templates (name, subject, body) VALUES (?, ?, ?)');
     $stmt->execute(['Erste Antwort', 'Wir haben Ihre Anfrage erhalten',
-        "Hallo {{requester.name}},\n\nvielen Dank für Ihre Nachricht (Ticket #{{ticket.number}}). Wir kümmern uns schnellstmöglich darum.\n\nViele Grüße\n{{agent.name}}"]);
-    $stmt->execute(['Ticket gelöst', 'Ihr Ticket wurde gelöst',
-        "Hallo {{requester.name}},\n\nwir haben Ihr Anliegen (Ticket #{{ticket.number}}) bearbeitet und als gelöst markiert. Bei weiteren Fragen antworten Sie einfach auf diese Email.\n\nViele Grüße\n{{agent.name}}"]);
-    $stmt->execute(['Rückfrage', 'Kurze Rückfrage zu Ihrem Ticket',
-        "Hallo {{requester.name}},\n\nkönnten Sie uns bitte weitere Informationen zu Ihrem Anliegen (Ticket #{{ticket.number}}) zukommen lassen?\n\nViele Grüße\n{{agent.name}}"]);
+        "Hallo {{requester.name}},\n\nvielen Dank für Ihre Nachricht (Fall-Nr. {{ticket.number}}). Wir kümmern uns schnellstmöglich darum.\n\nViele Grüße\n{{agent.name}}"]);
+    $stmt->execute(['Fall gelöst', 'Ihr Fall wurde gelöst',
+        "Hallo {{requester.name}},\n\nwir haben Ihr Anliegen (Fall-Nr. {{ticket.number}}) bearbeitet und als gelöst markiert. Bei weiteren Fragen antworten Sie einfach auf diese Email.\n\nViele Grüße\n{{agent.name}}"]);
+    $stmt->execute(['Rückfrage', 'Kurze Rückfrage zu Ihrem Fall',
+        "Hallo {{requester.name}},\n\nkönnten Sie uns bitte weitere Informationen zu Ihrem Anliegen (Fall-Nr. {{ticket.number}}) zukommen lassen?\n\nViele Grüße\n{{agent.name}}"]);
     $log[] = 'Beispiel-Vorlagen erstellt.';
 } else {
     $log[] = 'Vorlagen existieren bereits, übersprungen.';

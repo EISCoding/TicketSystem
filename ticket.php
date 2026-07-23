@@ -14,7 +14,7 @@ $ticketId = (int) ($_GET['id'] ?? 0);
 $ticket = Ticket::find($ticketId);
 if (!$ticket) {
     http_response_code(404);
-    die('Ticket nicht gefunden.');
+    die('Fall nicht gefunden.');
 }
 
 $notice = null;
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Bitte einen Antworttext eingeben.';
         } else {
             $lastIncoming = Message::lastIncoming($ticketId);
-            $subject = '[TICKET-' . $ticketId . '] ' . $ticket['subject'];
+            $subject = '[FALL-' . caseNumber($ticketId) . '] ' . $ticket['subject'];
             try {
                 $messageId = Mailer::sendReply(
                     $ticket['requester_email'],
@@ -90,7 +90,7 @@ $templateMap = [];
 foreach ($templates as $tpl) {
     $rendered = Template::render($tpl['body'], [
         'requester' => ['name' => $ticket['requester_name'] ?: $ticket['requester_email']],
-        'ticket' => ['number' => $ticket['id'], 'subject' => $ticket['subject']],
+        'ticket' => ['number' => caseNumber((int) $ticket['id']), 'subject' => $ticket['subject']],
         'agent' => ['name' => Auth::userName()],
     ]);
     $templateMap[$tpl['id']] = $rendered;
@@ -102,7 +102,7 @@ foreach ($templates as $tpl) {
 <div class="grid-2">
   <div>
     <div class="card ticket-stub">
-      <span class="stub-id">TICKET #<?= (int) $ticket['id'] ?></span>
+      <span class="stub-id"><i class='bx bxs-purchase-tag'></i> FALL-NR. <?= e(caseNumber((int) $ticket['id'])) ?></span>
       <h1><?= e($ticket['subject']) ?></h1>
       <p class="req">
         Von <strong><?= e($ticket['requester_name'] ?: $ticket['requester_email']) ?></strong>
@@ -121,12 +121,13 @@ foreach ($templates as $tpl) {
                  : ($m['direction'] === 'OUTGOING' ? ($m['author_name'] ?? 'Team')
                  : ($m['author_name'] ?? ''));
           $label = $m['direction'] === 'INTERNAL_NOTE' ? 'Interne Notiz' : ($m['direction'] === 'INCOMING' ? 'Kunde' : 'Antwort');
+          $tagIcon = $m['direction'] === 'INTERNAL_NOTE' ? 'bx-note' : ($m['direction'] === 'INCOMING' ? 'bx-user' : 'bx-reply');
         ?>
         <div class="message <?= $cls ?>">
           <span class="avatar <?= $avatarCls ?>"><?= e(mb_strtoupper(mb_substr((string) $senderName, 0, 1))) ?></span>
           <div class="message-content">
             <div class="message-meta">
-              <span><strong><?= e((string) $senderName) ?></strong> · <span class="tag"><?= e($label) ?></span></span>
+              <span><strong><?= e((string) $senderName) ?></strong> · <span class="tag"><i class='bx <?= $tagIcon ?>'></i> <?= e($label) ?></span></span>
               <span class="time"><?= e(date('d.m.Y H:i', strtotime($m['created_at']))) ?></span>
             </div>
             <div class="message-body"><?= e($m['body']) ?></div>
@@ -136,13 +137,13 @@ foreach ($templates as $tpl) {
     </div>
 
     <?php if ($error): ?>
-      <div class="alert alert-error"><?= e($error) ?></div>
+      <div class="alert alert-error"><i class='bx bx-error-circle icon'></i> <?= e($error) ?></div>
     <?php endif; ?>
 
     <div class="card">
       <div class="tabs">
-        <button type="button" id="tab-reply-btn" class="tab-btn active-reply">Antwort an Kunde</button>
-        <button type="button" id="tab-note-btn" class="tab-btn">Interne Notiz</button>
+        <button type="button" id="tab-reply-btn" class="tab-btn active-reply"><i class='bx bx-send'></i> Antwort an Kunde</button>
+        <button type="button" id="tab-note-btn" class="tab-btn"><i class='bx bx-note'></i> Interne Notiz</button>
       </div>
 
       <form id="reply-form" method="post" action="/ticket.php?id=<?= (int) $ticketId ?>">
@@ -160,7 +161,7 @@ foreach ($templates as $tpl) {
         <div class="field">
           <textarea id="reply_body" name="reply_body" rows="7" placeholder="Antwort schreiben..."></textarea>
         </div>
-        <button type="submit" class="btn">Antwort senden</button>
+        <button type="submit" class="btn"><i class='bx bx-send'></i> Antwort senden</button>
       </form>
 
       <form id="note-form" method="post" action="/ticket.php?id=<?= (int) $ticketId ?>" style="display:none;">
@@ -169,7 +170,7 @@ foreach ($templates as $tpl) {
         <div class="field">
           <textarea name="note_body" rows="5" placeholder="Interne Notiz (nicht sichtbar für Kunde)..."></textarea>
         </div>
-        <button type="submit" class="btn btn-warn">Notiz hinzufügen</button>
+        <button type="submit" class="btn btn-warn"><i class='bx bx-note'></i> Notiz hinzufügen</button>
       </form>
     </div>
   </div>
@@ -180,7 +181,7 @@ foreach ($templates as $tpl) {
       <input type="hidden" name="action" value="update_fields">
 
       <div class="card side-card">
-        <div class="eyebrow">Status &amp; Priorität</div>
+        <div class="eyebrow"><i class='bx bx-flag icon'></i> Status &amp; Priorität</div>
         <div class="field">
           <label for="status">Status</label>
           <select id="status" name="status">
@@ -201,7 +202,7 @@ foreach ($templates as $tpl) {
       </div>
 
       <div class="card side-card">
-        <div class="eyebrow">Zuordnung</div>
+        <div class="eyebrow"><i class='bx bx-group icon'></i> Zuordnung</div>
         <div class="field">
           <label for="team_id">Team</label>
           <select id="team_id" name="team_id">
@@ -229,7 +230,7 @@ foreach ($templates as $tpl) {
     </form>
 
     <div class="card side-card">
-      <div class="eyebrow">Zeitverlauf</div>
+      <div class="eyebrow"><i class='bx bx-history icon'></i> Zeitverlauf</div>
       <p class="small text-muted mono" style="margin:0 0 4px;">Erstellt <?= e(date('d.m.Y H:i', strtotime($ticket['created_at']))) ?></p>
       <p class="small text-muted mono" style="margin:0;">Aktualisiert <?= e(date('d.m.Y H:i', strtotime($ticket['updated_at']))) ?></p>
     </div>

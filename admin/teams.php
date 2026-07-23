@@ -48,7 +48,7 @@ require __DIR__ . '/../src/Views/admin_tabs.php';
           <?= Auth::csrfField() ?>
           <input type="hidden" name="action" value="delete">
           <input type="hidden" name="id" value="<?= (int) $team['id'] ?>">
-          <button type="submit" class="btn btn-danger" style="padding:5px 12px; font-size:0.8rem;">Löschen</button>
+          <button type="submit" class="btn btn-danger" style="padding:5px 12px; font-size:0.8rem;"><i class='bx bx-trash'></i> Löschen</button>
         </form>
       </div>
     <?php endforeach; ?>
@@ -57,7 +57,7 @@ require __DIR__ . '/../src/Views/admin_tabs.php';
   <form class="card" method="post" action="/admin/teams.php">
     <?= Auth::csrfField() ?>
     <input type="hidden" name="action" value="create">
-    <h2 class="mt-0" style="font-size:1rem;">Neues Team</h2>
+    <h2 class="mt-0" style="font-size:1rem; display:flex; align-items:center; gap:8px;"><i class='bx bx-sitemap icon'></i> Neues Team</h2>
     <div class="field">
       <label for="name">Team-Name</label>
       <input type="text" id="name" name="name" required>
@@ -71,7 +71,7 @@ require __DIR__ . '/../src/Views/admin_tabs.php';
         <input type="checkbox" name="is_default" style="width:auto;"> Standard-Team (Fallback)
       </label>
     </div>
-    <button type="submit" class="btn" style="width:100%;">Team anlegen</button>
+    <button type="submit" class="btn" style="width:100%;"><i class='bx bx-plus'></i> Team anlegen</button>
   </form>
 </div>
 

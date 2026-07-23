@@ -22,15 +22,20 @@ mit PHP + MySQL, ohne Node.js, ohne root, ohne Build-Schritt.
   etc. per `.htaccess`
 - **Kein `imap`-PHP-Modul:** seit PHP 8.4 aus dem Core entfernt und als veraltet eingestuft;
   stattdessen die aktiv gepflegte Bibliothek `webklex/php-imap`
+- **Keine externen Font-/Icon-CDNs:** Schrift (Plus Jakarta Sans) und Icons (Boxicons) liegen
+  selbst gehostet unter `assets/fonts/` bzw. `assets/vendor/` — Besucher-IPs werden dadurch nicht
+  an Drittanbieter wie Google Fonts übertragen (in Deutschland datenschutzrechtlich relevant)
 
 ## Architektur
 
 ```
 TicketSystem/            <- Plesk Document Root (ALLES liegt direkt hier drin)
   index.php, login.php, logout.php, tickets.php, ticket.php, install.php
-  admin/teams.php, admin/users.php, admin/templates.php
+  admin/teams.php, admin/users.php, admin/templates.php, admin/analytics.php
   cron/poll_mailbox.php
   assets/style.css, assets/app.js
+  assets/fonts/                 <- selbst gehostete Schrift (Plus Jakarta Sans) + Boxicons-Icon-Font
+  assets/vendor/                <- Boxicons CSS (lokal eingebunden, keine externe CDN-Abhängigkeit)
   config/                <- per .htaccess von außen gesperrt (siehe unten)
     config.example.php
   src/                    <- per .htaccess von außen gesperrt (PHP-Klassen)
@@ -129,10 +134,12 @@ Auf `https://deinedomain.de/login.php` mit dem in `config.php` hinterlegten Admi
 Für Gmail/Outlook empfiehlt sich ein **App-Passwort** (nicht das normale Login-Passwort), da diese
 Anbieter 2FA erzwingen.
 
-Antworten aus dem System enthalten automatisch `[TICKET-<nummer>]` im Betreff und setzen die
-Email-Header `In-Reply-To`/`References` korrekt. Antwortet der Kunde per "Antworten" in seinem
-Email-Programm, wird die Mail garantiert dem richtigen Ticket zugeordnet — auch wenn kein Tag
-mehr im Betreff steht.
+Antworten aus dem System enthalten automatisch `[FALL-<nummer>]` im Betreff (fünfstellig,
+z. B. `[FALL-00142]`) und setzen die Email-Header `In-Reply-To`/`References` korrekt. Antwortet
+der Kunde per "Antworten" in seinem Email-Programm, wird die Mail garantiert dem richtigen Fall
+zugeordnet — auch wenn kein Tag mehr im Betreff steht. Das ältere Tag-Format `[TICKET-<nummer>]`
+aus Zeiten vor der Umbenennung wird beim Einlesen weiterhin erkannt, damit laufende Email-Threads
+nicht abreißen.
 
 ## Team-Routing konfigurieren
 
@@ -140,6 +147,12 @@ Im Admin-Bereich → "Teams & Routing" Teams mit Keyword-Listen anlegen (z. B. T
 mit Keywords `rechnung,zahlung,billing`). Trifft ein Keyword auf Betreff oder Text einer neuen
 Mail zu, wird das Ticket automatisch diesem Team zugewiesen. Ein Team lässt sich als "Standard"
 markieren — das ist der Fallback, falls kein Keyword passt.
+
+## Analytics
+
+Im Admin-Bereich → "Analytics" gibt es eine Übersicht mit Kennzahlen (Fälle gesamt, offen,
+wartend, dringend, durchschnittliche Erstantwortzeit), dem Verlauf neuer Fälle der letzten 14
+Tage sowie Verteilungen nach Status, Priorität, Team und offener Fälle je Agent.
 
 ## Lokale Entwicklung
 

@@ -67,7 +67,7 @@ class Mailer
     {
         $brand = e(self::BRAND_NAME);
         $bodyHtml = nl2br(e($plainBody));
-        $ticketRef = $ticketId !== null ? 'Ticket #' . (int) $ticketId : null;
+        $ticketRef = $ticketId !== null ? 'Fall-Nr. ' . caseNumber($ticketId) : null;
 
         // Vom Agenten getippter Text (bzw. Vorlage) enthält bereits eine eigene Anrede,
         // daher wird hier keine zusätzliche Begrüßung eingefügt.
@@ -79,7 +79,7 @@ class Mailer
             ? '<span style="display:inline-block;background:#e2f3f1;color:#0a5b63;font-family:SFMono-Regular,Consolas,\'Liberation Mono\',Menlo,monospace;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;">' . e($ticketRef) . '</span>'
             : '';
         $footerNote = $ticketRef !== null
-            ? 'Diese Nachricht bezieht sich auf ' . e($ticketRef) . '. Antworten Sie einfach direkt auf diese Email, um mit uns in Kontakt zu bleiben — Ihre Antwort wird automatisch dem Ticket zugeordnet.'
+            ? 'Diese Nachricht bezieht sich auf ' . e($ticketRef) . '. Antworten Sie einfach direkt auf diese Email, um mit uns in Kontakt zu bleiben — Ihre Antwort wird automatisch dem Fall zugeordnet.'
             : 'Antworten Sie einfach direkt auf diese Email, um mit uns in Kontakt zu bleiben.';
 
         return <<<HTML
@@ -98,7 +98,7 @@ class Mailer
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; background:#ffffff; border-radius:16px; overflow:hidden; border:1px solid #dbe5e2;">
         <tr>
           <td style="background:linear-gradient(135deg,#17b8ac,#0a5b63); background-color:#0e7c86; padding:28px 32px;">
-            <span style="color:#ffffff; font-size:18px; font-weight:800; letter-spacing:-0.01em;">🎫 {$brand}</span>
+            <span style="color:#ffffff; font-size:18px; font-weight:800; letter-spacing:-0.01em;">{$brand}</span>
           </td>
         </tr>
         <tr>
