@@ -1,16 +1,59 @@
-// Vorlagen-Auswahl: befüllt das Antwort-Textfeld mit dem gerenderten Vorlagentext.
-document.addEventListener('DOMContentLoaded', function () {
-  var templateSelect = document.getElementById('template_select');
-  var replyBody = document.getElementById('reply_body');
+// Initialisiert einen Quill-Rich-Text-Editor über einem versteckten Formularfeld:
+// füllt ihn beim Start mit dessen aktuellem Wert und schreibt beim Absenden des
+// umgebenden Formulars das erzeugte HTML zurück in das Feld (das der Server liest).
+function initRichEditor(editorId, hiddenFieldId, placeholder) {
+  var container = document.getElementById(editorId);
+  var hidden = document.getElementById(hiddenFieldId);
+  if (!container || !hidden || typeof Quill === 'undefined') {
+    return null;
+  }
 
-  if (templateSelect && replyBody && window.TEMPLATES) {
+  var quill = new Quill(container, {
+    theme: 'snow',
+    placeholder: placeholder || '',
+    modules: {
+      toolbar: [
+        ['bold', 'italic', 'underline'],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        ['blockquote', 'link'],
+        ['clean'],
+      ],
+    },
+  });
+
+  if (hidden.value) {
+    // dangerouslyPasteHTML (statt root.innerHTML) laesst Quill das HTML in sein
+    // eigenes Delta-Modell einlesen - direktes innerHTML-Setzen haelt Quill nicht
+    // synchron und formatiert bei der naechsten Eingabe unter Umstaenden falsch.
+    quill.clipboard.dangerouslyPasteHTML(hidden.value);
+  }
+
+  var form = hidden.closest('form');
+  if (form) {
+    form.addEventListener('submit', function () {
+      hidden.value = quill.root.innerHTML;
+    });
+  }
+
+  return quill;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  // Antwort-Editor (ticket.php) - Vorlagen-Auswahl befüllt ihn mit dem gerenderten Vorlagentext.
+  var replyQuill = initRichEditor('reply_body_editor', 'reply_body', 'Antwort schreiben...');
+
+  var templateSelect = document.getElementById('template_select');
+  if (templateSelect && replyQuill && window.TEMPLATES) {
     templateSelect.addEventListener('change', function () {
       var tpl = window.TEMPLATES[templateSelect.value];
       if (tpl) {
-        replyBody.value = tpl;
+        replyQuill.clipboard.dangerouslyPasteHTML(tpl);
       }
     });
   }
+
+  // Vorlagen-Editor (admin/templates.php)
+  initRichEditor('body_editor', 'body', 'Text der Vorlage...');
 
   // Umschalten zwischen "Antwort an Kunde" und "Interne Notiz"
   var replyTabBtn = document.getElementById('tab-reply-btn');

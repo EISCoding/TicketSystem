@@ -25,6 +25,10 @@ mit PHP + MySQL, ohne Node.js, ohne root, ohne Build-Schritt.
 - **Keine externen Font-/Icon-CDNs:** Schrift (Plus Jakarta Sans) und Icons (Boxicons) liegen
   selbst gehostet unter `assets/fonts/` bzw. `assets/vendor/` — Besucher-IPs werden dadurch nicht
   an Drittanbieter wie Google Fonts übertragen (in Deutschland datenschutzrechtlich relevant)
+- **HTML-Bereinigung für Antworten/Vorlagen:** Der WYSIWYG-Editor (Quill) liefert HTML; `sanitizeHtml()`
+  in `bootstrap.php` lässt serverseitig nur eine kleine, für Email/Anzeige sichere Tag-/Attribut-Auswahl
+  zu (keine `<script>`, keine Event-Handler-Attribute, `href` nur `http(s)`/`mailto`) — unabhängig davon,
+  was der Editor clientseitig bereits abfängt
 
 ## Architektur
 
@@ -35,7 +39,7 @@ TicketSystem/            <- Plesk Document Root (ALLES liegt direkt hier drin)
   cron/poll_mailbox.php
   assets/style.css, assets/app.js
   assets/fonts/                 <- selbst gehostete Schrift (Plus Jakarta Sans) + Boxicons-Icon-Font
-  assets/vendor/                <- Boxicons CSS (lokal eingebunden, keine externe CDN-Abhängigkeit)
+  assets/vendor/                <- Boxicons CSS + Quill (WYSIWYG-Editor), beide lokal eingebunden
   config/                <- per .htaccess von außen gesperrt (siehe unten)
     config.example.php
   src/                    <- per .htaccess von außen gesperrt (PHP-Klassen)
@@ -153,6 +157,15 @@ markieren — das ist der Fallback, falls kein Keyword passt.
 Im Admin-Bereich → "Analytics" gibt es eine Übersicht mit Kennzahlen (Fälle gesamt, offen,
 wartend, dringend, durchschnittliche Erstantwortzeit), dem Verlauf neuer Fälle der letzten 14
 Tage sowie Verteilungen nach Status, Priorität, Team und offener Fälle je Agent.
+
+## Antwort-Vorlagen bearbeiten
+
+Im Admin-Bereich → "Antwort-Vorlagen" lassen sich Vorlagen anlegen, mit einem WYSIWYG-Editor
+(Fett/Kursiv/Unterstrichen, Listen, Zitat, Links) bearbeiten und löschen. Derselbe Editor steht
+auch beim Antworten direkt im Fall zur Verfügung — eine ausgewählte Vorlage wird mit den
+Platzhalterwerten (Name, Fall-Nr., Betreff) befüllt in den Editor eingesetzt und lässt sich vor
+dem Versenden noch anpassen. Alte, vor dem Editor angelegte Vorlagen (reiner Text) werden beim
+Öffnen automatisch in Absätze umgewandelt.
 
 ## Lokale Entwicklung
 

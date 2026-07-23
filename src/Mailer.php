@@ -55,18 +55,30 @@ class Mailer
         $mail->isHTML(true);
         $mail->Subject = $subject;
         $mail->Body = self::renderHtml($htmlBody, $ticketId, $requesterName);
-        $mail->AltBody = $htmlBody;
+        $mail->AltBody = self::htmlToPlainText($htmlBody);
 
         $mail->send();
 
         return $messageId;
     }
 
-    /** Baut eine schlichte, aber saubere HTML-Mail (tabellenbasiert, inline gestylt für Mail-Client-Kompatibilität). */
-    private static function renderHtml(string $plainBody, ?int $ticketId, ?string $requesterName): string
+    /** Baut eine grobe Klartext-Alternative aus dem HTML-Body (für Mail-Clients ohne HTML-Darstellung). */
+    private static function htmlToPlainText(string $html): string
+    {
+        $text = preg_replace('/<\/(p|div|h[1-6]|li|blockquote)>/i', "\n\n", $html) ?? $html;
+        $text = preg_replace('/<br\s*\/?>/i', "\n", $text) ?? $text;
+        $text = html_entity_decode(strip_tags($text), ENT_QUOTES, 'UTF-8');
+        return trim(preg_replace('/\n{3,}/', "\n\n", $text) ?? $text);
+    }
+
+    /**
+     * Baut eine schlichte, aber saubere HTML-Mail (tabellenbasiert, inline gestylt für
+     * Mail-Client-Kompatibilität). $bodyHtml kommt bereits über sanitizeHtml() bereinigt
+     * vom Aufrufer und wird hier unverändert eingebettet (nicht escapen!).
+     */
+    private static function renderHtml(string $bodyHtml, ?int $ticketId, ?string $requesterName): string
     {
         $brand = e(self::BRAND_NAME);
-        $bodyHtml = nl2br(e($plainBody));
         $ticketRef = $ticketId !== null ? 'Fall-Nr. ' . caseNumber($ticketId) : null;
 
         // Vom Agenten getippter Text (bzw. Vorlage) enthält bereits eine eigene Anrede,
@@ -89,6 +101,13 @@ class Mailer
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{$brand}</title>
+<style>
+  .msg-content p { margin: 0 0 12px; }
+  .msg-content p:last-child { margin-bottom: 0; }
+  .msg-content ul, .msg-content ol { margin: 0 0 12px; padding-left: 22px; }
+  .msg-content a { color: #0e7c86; }
+  .msg-content blockquote { margin: 0 0 12px; padding-left: 12px; border-left: 3px solid #dbe5e2; color: #3a4a4d; }
+</style>
 </head>
 <body style="margin:0; padding:0; background:#e9f0ee; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
 <div style="display:none; max-height:0; overflow:hidden; opacity:0; font-size:1px; line-height:1px; color:#e9f0ee;">{$preheaderText}</div>
@@ -104,7 +123,7 @@ class Mailer
         <tr>
           <td style="padding:32px;">
             {$ticketBadge}
-            <div style="margin-top:16px; font-size:15px; line-height:1.6; color:#10181c;">{$bodyHtml}</div>
+            <div class="msg-content" style="margin-top:16px; font-size:15px; line-height:1.6; color:#10181c;">{$bodyHtml}</div>
           </td>
         </tr>
         <tr>

@@ -46,8 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'send_reply') {
-        $body = trim((string) ($_POST['reply_body'] ?? ''));
-        if ($body === '') {
+        $body = sanitizeHtml((string) ($_POST['reply_body'] ?? ''));
+        if (isHtmlEmpty($body)) {
             $error = 'Bitte einen Antworttext eingeben.';
         } else {
             $lastIncoming = Message::lastIncoming($ticketId);
@@ -83,6 +83,7 @@ $statusLabels = ['OPEN' => 'Offen', 'PENDING' => 'Wartend', 'RESOLVED' => 'Gelö
 $priorityLabels = ['LOW' => 'Niedrig', 'MEDIUM' => 'Mittel', 'HIGH' => 'Hoch', 'URGENT' => 'Dringend'];
 
 $activePage = 'tickets';
+$needsEditor = true;
 require __DIR__ . '/src/Views/header.php';
 
 // Vorlagen für JS vorbereiten (bereits serverseitig gerendert, JSON-escaped für sicheres Einbetten)
@@ -130,7 +131,11 @@ foreach ($templates as $tpl) {
               <span><strong><?= e((string) $senderName) ?></strong> · <span class="tag"><i class='bx <?= $tagIcon ?>'></i> <?= e($label) ?></span></span>
               <span class="time"><?= e(date('d.m.Y H:i', strtotime($m['created_at']))) ?></span>
             </div>
-            <div class="message-body"><?= e($m['body']) ?></div>
+            <?php if ($m['direction'] === 'OUTGOING'): ?>
+              <div class="message-body rich-text"><?= ensureHtml($m['body']) ?></div>
+            <?php else: ?>
+              <div class="message-body"><?= e($m['body']) ?></div>
+            <?php endif; ?>
           </div>
         </div>
       <?php endforeach; ?>
@@ -159,7 +164,8 @@ foreach ($templates as $tpl) {
           </select>
         </div>
         <div class="field">
-          <textarea id="reply_body" name="reply_body" rows="7" placeholder="Antwort schreiben..."></textarea>
+          <textarea id="reply_body" name="reply_body" style="display:none;"></textarea>
+          <div id="reply_body_editor" class="editor-wrap"></div>
         </div>
         <button type="submit" class="btn"><i class='bx bx-send'></i> Antwort senden</button>
       </form>

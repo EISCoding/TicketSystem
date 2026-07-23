@@ -1,5 +1,8 @@
 <?php
-/** @var string $activePage */
+/**
+ * @var string $activePage
+ * @var bool $needsEditor Vorherige Seite kann dies setzen, um den WYSIWYG-Editor (Quill) zu laden.
+ */
 use App\Auth;
 ?>
 <!doctype html>
@@ -9,6 +12,9 @@ use App\Auth;
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ticketsystem</title>
   <link rel="stylesheet" href="/assets/vendor/boxicons.min.css">
+  <?php if (!empty($needsEditor)): ?>
+    <link rel="stylesheet" href="/assets/vendor/quill/quill.snow.css">
+  <?php endif; ?>
   <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
