@@ -9,7 +9,7 @@ use PHPMailer\PHPMailer\Exception as PHPMailerException;
 class Mailer
 {
     /** Platzhalter-Markenname für den Mail-Header. Bei Bedarf einfach anpassen. */
-    private const BRAND_NAME = 'Unser Support-Team';
+    private const BRAND_NAME = 'DaAdre.de Support';
 
     /**
      * Verschickt eine Antwort-Email mit korrektem Threading (In-Reply-To/References),
