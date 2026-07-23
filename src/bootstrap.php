@@ -69,3 +69,9 @@ function e(?string $value): string
 {
     return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
 }
+
+/** Formatiert eine Fallnummer fünfstellig mit führenden Nullen (1 -> "00001"). */
+function caseNumber(int $id): string
+{
+    return str_pad((string) $id, 5, '0', STR_PAD_LEFT);
+}

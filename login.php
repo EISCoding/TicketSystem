@@ -31,12 +31,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login — Ticketsystem</title>
+  <link rel="stylesheet" href="/assets/vendor/boxicons.min.css">
   <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
 <div class="login-wrap">
   <div class="login-brand">
-    <span class="brand-icon">🎫</span>
+    <span class="brand-icon"><i class='bx bxs-purchase-tag'></i></span>
     <h1>Ticketsystem</h1>
     <p>Alle Kundenanfragen an einem Ort — zuweisen, beantworten und im Blick behalten.</p>
   </div>
@@ -46,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <p>Melde dich mit deinem Team-Account an.</p>
 
       <?php if ($error): ?>
-        <div class="alert alert-error"><?= e($error) ?></div>
+        <div class="alert alert-error"><i class='bx bx-error-circle icon'></i> <?= e($error) ?></div>
       <?php endif; ?>
 
       <?= Auth::csrfField() ?>

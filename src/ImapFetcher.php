@@ -10,8 +10,10 @@ use Webklex\PHPIMAP\ClientManager;
 
 class ImapFetcher
 {
-    // Erkennt "[TICKET-1042]" im Betreff (case-insensitive)
-    private const TICKET_TAG_REGEX = '/\[TICKET-(\d+)\]/i';
+    // Erkennt "[FALL-00142]" (aktuelles Format) sowie das ältere "[TICKET-142]" im Betreff
+    // (case-insensitive, führende Nullen werden toleriert) - wichtig für laufende Email-Threads
+    // aus der Zeit vor der Umbenennung von "Ticket" auf "Fall".
+    private const TICKET_TAG_REGEX = '/\[(?:FALL|TICKET)-0*(\d+)\]/i';
 
     public static function poll(): array
     {

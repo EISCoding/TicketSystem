@@ -87,4 +87,100 @@ class Ticket
     {
         \getPDO()->prepare('UPDATE tickets SET updated_at = NOW() WHERE id = ?')->execute([$id]);
     }
+
+    public static function totalCount(): int
+    {
+        return (int) \getPDO()->query('SELECT COUNT(*) FROM tickets')->fetchColumn();
+    }
+
+    /** Fallzahl je Status, inkl. Status ohne laufende Fälle (Wert 0). */
+    public static function countsByStatus(): array
+    {
+        $counts = array_fill_keys(['OPEN', 'PENDING', 'RESOLVED', 'CLOSED'], 0);
+        $rows = \getPDO()->query('SELECT status, COUNT(*) AS c FROM tickets GROUP BY status')->fetchAll();
+        foreach ($rows as $row) {
+            $counts[$row['status']] = (int) $row['c'];
+        }
+        return $counts;
+    }
+
+    /** Fallzahl je Priorität, inkl. Prioritäten ohne laufende Fälle (Wert 0). */
+    public static function countsByPriority(): array
+    {
+        $counts = array_fill_keys(['LOW', 'MEDIUM', 'HIGH', 'URGENT'], 0);
+        $rows = \getPDO()->query('SELECT priority, COUNT(*) AS c FROM tickets GROUP BY priority')->fetchAll();
+        foreach ($rows as $row) {
+            $counts[$row['priority']] = (int) $row['c'];
+        }
+        return $counts;
+    }
+
+    /** Neu eingegangene Fälle pro Tag der letzten $days Tage (inkl. Tage ohne Eingang, Wert 0). */
+    public static function createdPerDay(int $days): array
+    {
+        $stmt = \getPDO()->prepare(
+            'SELECT DATE(created_at) AS d, COUNT(*) AS c FROM tickets
+             WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+             GROUP BY DATE(created_at)'
+        );
+        $stmt->execute([$days - 1]);
+        $byDate = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $byDate[$row['d']] = (int) $row['c'];
+        }
+
+        $series = [];
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $date = date('Y-m-d', strtotime("-{$i} days"));
+            $series[] = ['date' => $date, 'count' => $byDate[$date] ?? 0];
+        }
+        return $series;
+    }
+
+    /** Fallzahl je Team, absteigend sortiert. Fälle ohne Team laufen unter "Kein Team". */
+    public static function countsByTeam(): array
+    {
+        $rows = \getPDO()->query(
+            'SELECT COALESCE(tm.name, "Kein Team") AS team_name, COUNT(*) AS c
+             FROM tickets t
+             LEFT JOIN teams tm ON tm.id = t.team_id
+             GROUP BY team_name
+             ORDER BY c DESC'
+        )->fetchAll();
+        return array_map(fn ($r) => ['label' => $r['team_name'], 'count' => (int) $r['c']], $rows);
+    }
+
+    /** Offene/wartende Fälle je zugewiesenem Agent, absteigend sortiert. */
+    public static function openCountsByAgent(): array
+    {
+        $rows = \getPDO()->query(
+            'SELECT COALESCE(u.name, "Nicht zugewiesen") AS agent_name, COUNT(*) AS c
+             FROM tickets t
+             LEFT JOIN users u ON u.id = t.assigned_to_id
+             WHERE t.status IN ("OPEN", "PENDING")
+             GROUP BY agent_name
+             ORDER BY c DESC'
+        )->fetchAll();
+        return array_map(fn ($r) => ['label' => $r['agent_name'], 'count' => (int) $r['c']], $rows);
+    }
+
+    /** Durchschnittliche Zeit bis zur ersten Antwort in Stunden (nur Fälle mit mind. einer Antwort). */
+    public static function avgFirstResponseHours(): ?float
+    {
+        $row = \getPDO()->query(
+            'SELECT AVG(TIMESTAMPDIFF(SECOND, t.created_at, first_reply.first_at)) AS avg_seconds
+             FROM tickets t
+             INNER JOIN (
+                 SELECT ticket_id, MIN(created_at) AS first_at
+                 FROM messages
+                 WHERE direction = "OUTGOING"
+                 GROUP BY ticket_id
+             ) first_reply ON first_reply.ticket_id = t.id'
+        )->fetch();
+
+        if (!$row || $row['avg_seconds'] === null) {
+            return null;
+        }
+        return round(((float) $row['avg_seconds']) / 3600, 1);
+    }
 }

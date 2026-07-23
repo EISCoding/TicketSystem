@@ -44,4 +44,31 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   });
+
+  // Mobile Sidebar ein-/ausblenden
+  var sidebarToggle = document.getElementById('sidebarToggle');
+  var sidebar = document.getElementById('appSidebar');
+  var backdrop = document.getElementById('sidebarBackdrop');
+
+  function closeSidebar() {
+    sidebar.classList.remove('is-open');
+    backdrop.classList.remove('is-open');
+    sidebarToggle.setAttribute('aria-expanded', 'false');
+  }
+  function openSidebar() {
+    sidebar.classList.add('is-open');
+    backdrop.classList.add('is-open');
+    sidebarToggle.setAttribute('aria-expanded', 'true');
+  }
+
+  if (sidebarToggle && sidebar && backdrop) {
+    sidebarToggle.addEventListener('click', function () {
+      if (sidebar.classList.contains('is-open')) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    });
+    backdrop.addEventListener('click', closeSidebar);
+  }
 });

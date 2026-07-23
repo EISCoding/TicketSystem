@@ -45,11 +45,11 @@ require __DIR__ . '/../src/Views/admin_tabs.php';
             <?= Auth::csrfField() ?>
             <input type="hidden" name="action" value="delete">
             <input type="hidden" name="id" value="<?= (int) $tpl['id'] ?>">
-            <button type="submit" class="btn btn-danger" style="padding:4px 10px; font-size:0.75rem;">Löschen</button>
+            <button type="submit" class="btn btn-danger" style="padding:4px 10px; font-size:0.75rem;"><i class='bx bx-trash'></i> Löschen</button>
           </form>
         </div>
         <div class="small text-muted">Betreff: <?= e($tpl['subject']) ?></div>
-        <div class="small" style="background:#fafbfc; border-radius:8px; padding:8px; margin-top:6px; white-space:pre-wrap;"><?= e($tpl['body']) ?></div>
+        <div class="small mono" style="background:var(--surface-2); border-radius:8px; padding:8px; margin-top:6px; white-space:pre-wrap;"><?= e($tpl['body']) ?></div>
       </div>
     <?php endforeach; ?>
   </div>
@@ -57,8 +57,8 @@ require __DIR__ . '/../src/Views/admin_tabs.php';
   <form class="card" method="post" action="/admin/templates.php">
     <?= Auth::csrfField() ?>
     <input type="hidden" name="action" value="create">
-    <h2 class="mt-0" style="font-size:1rem;">Neue Vorlage</h2>
-    <p class="small text-muted">Platzhalter: <code>{{requester.name}}</code>, <code>{{ticket.number}}</code>, <code>{{ticket.subject}}</code>, <code>{{agent.name}}</code></p>
+    <h2 class="mt-0" style="font-size:1rem; display:flex; align-items:center; gap:8px;"><i class='bx bx-file-blank icon'></i> Neue Vorlage</h2>
+    <p class="small text-muted">Platzhalter: <code>{{requester.name}}</code>, <code>{{ticket.number}}</code> (Fall-Nr.), <code>{{ticket.subject}}</code>, <code>{{agent.name}}</code></p>
     <div class="field">
       <label for="name">Name der Vorlage</label>
       <input type="text" id="name" name="name" required>
@@ -71,7 +71,7 @@ require __DIR__ . '/../src/Views/admin_tabs.php';
       <label for="body">Text der Vorlage</label>
       <textarea id="body" name="body" rows="6" required></textarea>
     </div>
-    <button type="submit" class="btn" style="width:100%;">Vorlage anlegen</button>
+    <button type="submit" class="btn" style="width:100%;"><i class='bx bx-plus'></i> Vorlage anlegen</button>
   </form>
 </div>
 

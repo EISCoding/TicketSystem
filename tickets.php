@@ -22,11 +22,14 @@ $activePage = 'tickets';
 require __DIR__ . '/src/Views/header.php';
 ?>
 
-<h1 class="mt-0" style="margin-bottom:4px;">Tickets</h1>
-<p class="text-muted mb-16"><?= count($tickets) ?> Ticket<?= count($tickets) === 1 ? '' : 's' ?> gefunden</p>
+<h1 class="mt-0" style="margin-bottom:4px;">Fälle</h1>
+<p class="text-muted mb-16"><?= count($tickets) ?> <?= count($tickets) === 1 ? 'Fall' : 'Fälle' ?> gefunden</p>
 
 <form class="filters" method="get" action="/tickets.php">
-  <input type="search" name="search" placeholder="Suche im Betreff..." value="<?= e($filters['search']) ?>">
+  <div class="input-icon">
+    <i class='bx bx-search'></i>
+    <input type="search" name="search" placeholder="Suche im Betreff..." value="<?= e($filters['search']) ?>">
+  </div>
   <select name="status">
     <option value="">Alle Status</option>
     <?php foreach ($statusLabels as $key => $label): ?>
@@ -41,40 +44,35 @@ require __DIR__ . '/src/Views/header.php';
       </option>
     <?php endforeach; ?>
   </select>
-  <button type="submit" class="btn">Filtern</button>
+  <button type="submit" class="btn"><i class='bx bx-filter-alt icon'></i> Filtern</button>
 </form>
 
 <?php if (empty($tickets)): ?>
   <div class="card empty-state">
-    <div class="empty-icon">🗂️</div>
-    <p style="margin:0; font-weight:600; color:var(--text);">Keine Tickets gefunden</p>
+    <div class="empty-icon"><i class='bx bx-folder-open'></i></div>
+    <p style="margin:0; font-weight:600; color:var(--text);">Keine Fälle gefunden</p>
     <p class="small" style="margin:4px 0 0;">Passe die Filter an oder warte auf neue Kundenanfragen.</p>
   </div>
 <?php else: ?>
   <div class="card" style="padding:0; overflow:hidden;">
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th><th>Betreff</th><th>Anfragender</th><th>Team</th>
-            <th>Zugewiesen</th><th>Priorität</th><th>Status</th><th>Aktualisiert</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php foreach ($tickets as $t): ?>
-            <tr>
-              <td><a href="/ticket.php?id=<?= (int) $t['id'] ?>">#<?= (int) $t['id'] ?></a></td>
-              <td><a href="/ticket.php?id=<?= (int) $t['id'] ?>"><?= e($t['subject']) ?></a></td>
-              <td><?= e($t['requester_name'] ?: $t['requester_email']) ?></td>
-              <td><?= e($t['team_name'] ?? '–') ?></td>
-              <td><?= e($t['assigned_name'] ?? '–') ?></td>
-              <td><span class="badge badge-<?= strtolower(e($t['priority'])) ?>"><?= e($priorityLabels[$t['priority']] ?? $t['priority']) ?></span></td>
-              <td><span class="badge badge-<?= strtolower(e($t['status'])) ?>"><?= e($statusLabels[$t['status']] ?? $t['status']) ?></span></td>
-              <td class="small text-muted"><?= e(date('d.m.Y H:i', strtotime($t['updated_at']))) ?></td>
-            </tr>
-          <?php endforeach; ?>
-        </tbody>
-      </table>
+    <div class="ticket-list">
+      <?php foreach ($tickets as $t): ?>
+        <?php $requesterLabel = $t['requester_name'] ?: $t['requester_email']; ?>
+        <a class="ticket-row" href="/ticket.php?id=<?= (int) $t['id'] ?>">
+          <span class="avatar avatar-muted"><?= e(mb_strtoupper(mb_substr((string) $requesterLabel, 0, 1))) ?></span>
+          <div class="ticket-row-main">
+            <div class="ticket-row-title"><span class="ticket-num">Fall-Nr. <?= e(caseNumber((int) $t['id'])) ?></span><?= e($t['subject']) ?></div>
+            <div class="ticket-row-sub small text-muted">
+              <?= e($requesterLabel) ?> · <?= e($t['team_name'] ?? 'Kein Team') ?> · <?= e($t['assigned_name'] ?? 'Nicht zugewiesen') ?>
+            </div>
+          </div>
+          <div class="ticket-row-badges">
+            <span class="badge badge-<?= strtolower(e($t['priority'])) ?>"><?= e($priorityLabels[$t['priority']] ?? $t['priority']) ?></span>
+            <span class="badge badge-<?= strtolower(e($t['status'])) ?>"><?= e($statusLabels[$t['status']] ?? $t['status']) ?></span>
+          </div>
+          <div class="ticket-row-time small text-muted"><?= e(date('d.m.Y H:i', strtotime($t['updated_at']))) ?></div>
+        </a>
+      <?php endforeach; ?>
     </div>
   </div>
 <?php endif; ?>
